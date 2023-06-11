@@ -10,14 +10,153 @@ import UIKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
+    
+    struct Post {
+        let title: String
+    }
+    
+        
+    class ProfileViewController: UIViewController {
+        
+            let post: Post
+
+            init(post: Post) {
+                self.post = post
+                super.init(nibName: nil, bundle: nil)
+                title = post.title
+            }
+        
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+        
+        override func viewDidLoad() {
+            super.viewDidLoad()
+            
+            view.backgroundColor = .systemBackground
+            title = "Профиль"
+        }
+        
+
+        
+        
+    }
+    
+    class FeedViewController: UIViewController {
+        override func viewDidLoad() {
+            super.viewDidLoad()
+            
+            view.backgroundColor = .systemBackground
+            title = "Лента"
+            let button = UIButton(type: .system)
+            button.setTitle("Показать пост", for: .normal)
+            button.addTarget(self, action: #selector(showPost), for: .touchUpInside)
+            button.translatesAutoresizingMaskIntoConstraints = false
+
+            view.addSubview(button)
+
+    
+            button.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+            button.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
+        }
+        @objc private func showPost() {
+               let post = Post(title: "Пример поста")
+            let postViewController = PostViewController()
+             postViewController.post = post
+             navigationController?.pushViewController(postViewController, animated: true)
+           }
+        
+
+        
+    }
+    
+    class PostViewController: UIViewController {
+
+        var post: Post?
+
+        override func viewDidLoad() {
+            super.viewDidLoad()
+
+            view.backgroundColor = .systemBackground
+
+            if let post = post {
+                title = post.title
+            }
+            
+            let infoButton = UIBarButtonItem(image: UIImage(systemName: "info.circle"), style: .plain, target: self, action: #selector(showInfo))
+            navigationItem.rightBarButtonItem = infoButton
+        }
+
+        @objc private func showInfo() {
+            let infoViewController = InfoViewController()
+            let navigationController = UINavigationController(rootViewController: infoViewController)
+            navigationController.modalPresentationStyle = .fullScreen
+            present(navigationController, animated: true, completion: nil)
+        }
+    }
+    
+    class InfoViewController: UIViewController {
+
+        override func viewDidLoad() {
+            super.viewDidLoad()
+
+            title = "Info"
+            view.backgroundColor = .systemBackground
+
+            let button = UIButton(type: .system)
+            button.setTitle("Show Alert", for: .normal)
+            button.addTarget(self, action: #selector(showAlert), for: .touchUpInside)
+            button.translatesAutoresizingMaskIntoConstraints = false
+
+            view.addSubview(button)
+
+            NSLayoutConstraint.activate([
+                button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                button.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            ])
+        }
+
+        @objc private func showAlert() {
+            let alertController = UIAlertController(title: "Alert", message: "This is an example alert", preferredStyle: .alert)
+
+            let action1 = UIAlertAction(title: "Action 1", style: .default) { _ in
+                print("Action 1 tapped")
+            }
+            alertController.addAction(action1)
+
+            let action2 = UIAlertAction(title: "Action 2", style: .default) { _ in
+                print("Action 2 tapped")
+            }
+            alertController.addAction(action2)
+
+            present(alertController, animated: true, completion: nil)
+        }
+    }
 
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+
+        let tabBarController = UITabBarController()
+
+        let feedViewController = FeedViewController()
+        let feedNavigationController = UINavigationController(rootViewController: feedViewController)
+        feedNavigationController.tabBarItem = UITabBarItem(title: "Лента", image: UIImage(systemName: "list.bullet"), tag: 0)
+
+        let post = Post(title: "Пост")
+        let profileViewController = ProfileViewController(post: post)
+        let profileNavigationController = UINavigationController(rootViewController: profileViewController)
+        profileNavigationController.tabBarItem = UITabBarItem(title: "Профиль", image: UIImage(systemName: "person"), tag: 1)
+
+        tabBarController.viewControllers = [feedNavigationController, profileNavigationController]
+
+        window = UIWindow(windowScene: windowScene)
+        window?.rootViewController = tabBarController
+        window?.makeKeyAndVisible()
     }
+}
+    
+   
 
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
@@ -48,5 +187,5 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
 
-}
+
 
